@@ -10,6 +10,14 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
+  server.use(express.json());
+
+  const apiRouter = require('./api/routes');
+  const { notFound, errorHandler } = require('./api/middleware/errorHandler');
+
+  server.use('/api/v1', apiRouter);
+  server.use('/api/v1', notFound);
+  server.use(errorHandler);
 
   // 1. Sample REST API endpoint
   server.get('/api/hello', (req, res) => {
@@ -22,7 +30,7 @@ app.prepare().then(() => {
     return handle(req, res);
   });
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.API_PORT || process.env.PORT || 3000;
   server.listen(port, (err) => {
     if (err) {
         console.error('Error starting server:', err);
