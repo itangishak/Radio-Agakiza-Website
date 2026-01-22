@@ -1,0 +1,36 @@
+const express = require('express');
+const next = require('next');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+  const server = express();
+
+  // 1. Sample REST API endpoint
+  server.get('/api/hello', (req, res) => {
+    res.json({ message: 'Hello from Node.js back-end!' });
+  });
+
+  // 2. Corrected Catch-all: Change '/*' to '*' 
+  // This sends all other requests to the Next.js renderer
+  server.all(/.*/, (req, res) => {
+    return handle(req, res);
+  });
+
+  const port = process.env.PORT || 3000;
+  server.listen(port, (err) => {
+    if (err) {
+        console.error('Error starting server:', err);
+        process.exit(1);
+    }
+    console.log(`> Ready on http://localhost:${port}`);
+  });
+}).catch((ex) => {
+  console.error(ex.stack);
+  process.exit(1);
+});
