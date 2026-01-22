@@ -1,0 +1,12 @@
+filter.lfs.process=git-lfs filter-process
+filter.lfs.required=true
+filter.lfs.clean=git-lfs clean -- %f
+filter.lfs.smudge=git-lfs smudge -- %f
+user.name=itangishak
+user.email=itangishak
+http.postbuffer=104857600
+http.version=HTTP/1.1
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
