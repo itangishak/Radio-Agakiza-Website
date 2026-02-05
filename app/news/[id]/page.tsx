@@ -4,9 +4,10 @@ import type { Metadata } from "next";
 import { formatKirundiDateFull } from "../../../lib/time";
 
 export async function generateMetadata(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   const article = await apiGet<Article>(`/articles/${id}`);
   if (!article) {
     return { title: "Article — Radio Agakiza" };
@@ -42,8 +43,9 @@ type Article = {
   excerpt?: string | null;
 };
 
-export default async function ArticlePage({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   const article = await apiGet<Article>(`/articles/${id}`);
   
   if (!article) {
@@ -60,6 +62,13 @@ export default async function ArticlePage({ params }: { params: { id: string } }
       </div>
     );
   }
+
+  const content = article.content?.trim() ?? "";
+  const hasHtmlContent = /<[^>]+>/.test(content);
+  const contentParagraphs = content
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50/30 via-white to-accent-50/20">
@@ -135,10 +144,26 @@ export default async function ArticlePage({ params }: { params: { id: string } }
           
           {/* Content */}
           <div className="p-8 sm:p-12">
-            <div 
-              className="prose prose-lg max-w-none prose-brand prose-headings:text-brand-900 prose-headings:font-bold prose-p:text-brand-700 prose-p:leading-relaxed prose-a:text-accent-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-brand-800 prose-blockquote:border-l-accent-500 prose-blockquote:bg-accent-50/50 prose-blockquote:text-brand-700"
-              dangerouslySetInnerHTML={{ __html: article.content }} 
-            />
+            {content ? (
+              hasHtmlContent ? (
+                <div
+                  className="prose prose-lg max-w-none prose-brand prose-headings:text-brand-900 prose-headings:font-bold prose-p:text-brand-700 prose-p:leading-relaxed prose-a:text-accent-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-brand-800 prose-blockquote:border-l-accent-500 prose-blockquote:bg-accent-50/50 prose-blockquote:text-brand-700"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              ) : (
+                <div className="prose prose-lg max-w-none prose-brand prose-headings:text-brand-900 prose-headings:font-bold prose-p:text-brand-700 prose-p:leading-relaxed prose-a:text-accent-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-brand-800 prose-blockquote:border-l-accent-500 prose-blockquote:bg-accent-50/50 prose-blockquote:text-brand-700">
+                  {contentParagraphs.map((paragraph, index) => (
+                    <p key={`${index}-${paragraph.slice(0, 16)}`}>{paragraph}</p>
+                  ))}
+                </div>
+              )
+            ) : article.excerpt ? (
+              <p className="text-lg text-brand-700 leading-relaxed">{article.excerpt}</p>
+            ) : (
+              <p className="text-lg text-brand-600 leading-relaxed">
+                Nta birimwo biraboneka kuri iyi nkuru.
+              </p>
+            )}
           </div>
         </article>
 
