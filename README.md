@@ -90,7 +90,28 @@ The app and API run at: http://localhost:3000
 - News: List and article details
 - About: Static info
 
+## Admin Panel
+
+Complete admin interface for content management:
+
+- **Access**: http://localhost:3000/admin/login
+- **Credentials**: admin@radioagakiza.com / admin123
+- **Setup**: `npm run admin:setup` (creates admin user)
+- **Sample Data**: `npm run admin:sample` (optional test data)
+
+### Admin Features
+
+- **Programs**: Manage radio shows with hosts and schedules
+- **News**: Create/edit articles with publish status
+- **Podcasts**: Upload episodes with audio URLs
+- **Testimonials**: Manage listener feedback
+- **Streaming**: Update live stream URL instantly
+
+All CRUD operations work with table-based UI, form validation, and JWT authentication.
+
 ## Notes
 
 - No React hydration warnings expected; if you see any, restart dev server after env or dependency changes
 - For SSR fetches, the app uses absolute API origin on the server and relative on the client
+
+sudo systemctl start mysql

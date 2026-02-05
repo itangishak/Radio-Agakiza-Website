@@ -1,5 +1,12 @@
 const { pool } = require('../config/db');
 
+function toPlainText(html) {
+  return String(html || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function listArticles({ status, limit = 50, offset = 0 } = {}) {
   const params = [];
   let where = '';
@@ -7,25 +14,50 @@ async function listArticles({ status, limit = 50, offset = 0 } = {}) {
     where = 'WHERE a.status = ?';
     params.push(status);
   }
-  params.push(Number(limit), Number(offset));
-  const [rows] = await pool.execute(
-    `SELECT a.id, a.author_id, a.title, a.slug, a.excerpt, a.cover_image_url, a.status,
-            a.published_at, a.created_at, a.updated_at,
-            u.full_name AS author_name
-     FROM articles a
-     JOIN users u ON u.id = a.author_id
-     ${where}
-     ORDER BY a.created_at DESC
-     LIMIT ? OFFSET ?`,
-    params
-  );
-  return rows;
+  const limitN = Math.max(1, Math.min(100, parseInt(limit, 10) || 30));
+  const offsetN = Math.max(0, parseInt(offset, 10) || 0);
+  const sql = `
+    SELECT a.id, a.author_id, a.title, a.slug, a.excerpt, a.content,
+           COALESCE(a.cover_image_url, a.image_large, a.image_medium, a.image_thumbnail) AS cover_image_url,
+           a.status,
+           a.published_at, a.created_at, a.updated_at,
+           u.full_name AS author_name
+    FROM articles a
+    JOIN users u ON u.id = a.author_id
+    ${where}
+    ORDER BY a.created_at DESC
+    LIMIT ${limitN} OFFSET ${offsetN}`;
+  const [rows] = await pool.execute(sql, params);
+  const data = rows.map(r => {
+    if (!r.excerpt) {
+      const txt = toPlainText(r.content);
+      r.excerpt = txt || null;
+    }
+    // Provide a preview text always, based on excerpt if present, otherwise content
+    r.preview_text = toPlainText(r.excerpt || r.content);
+    delete r.content;
+    return r;
+  });
+  return data;
 }
 
 async function getArticle(id) {
   const [[row]] = await pool.execute(
-    `SELECT a.*, u.full_name AS author_name
-     FROM articles a JOIN users u ON u.id = a.author_id
+    `SELECT 
+        a.id,
+        a.author_id,
+        a.title,
+        a.slug,
+        a.excerpt,
+        a.content,
+        COALESCE(a.cover_image_url, a.image_large, a.image_medium, a.image_thumbnail) AS cover_image_url,
+        a.status,
+        a.published_at,
+        a.created_at,
+        a.updated_at,
+        u.full_name AS author_name
+     FROM articles a 
+     JOIN users u ON u.id = a.author_id
      WHERE a.id = ? LIMIT 1`,
     [id]
   );

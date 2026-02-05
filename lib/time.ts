@@ -20,3 +20,31 @@ export function toLocalTimeLabel(time: string, tz: string) {
   const local = now.setZone(DateTime.local().zoneName);
   return local.toFormat('HH:mm');
 }
+
+export function formatKirundiDateFull(dateStr: string) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const months = [
+    'Nzero','Ruhuhuma','Ntwarante','Ndamukiza','Rusama','Ruheshi',
+    'Mukakaro','Myandagaro','Nyakanga','Gitugutu','Munyonyo','Kigarama',
+  ];
+  const day = d.getDate();
+  const month = months[d.getMonth()] ?? '';
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
+export function formatKirundiMonthDay(dateStr: string) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const months = [
+    'Nzero','Ruhuhuma','Ntwarante','Ndamukiza','Rusama','Ruheshi',
+    'Mukakaro','Myandagaro','Nyakanga','Gitugutu','Munyonyo','Kigarama',
+  ];
+  const abbr = (months[d.getMonth()] ?? '').slice(0, 3);
+  const day = d.getDate();
+  return `${abbr} ${day}`;
+}
+

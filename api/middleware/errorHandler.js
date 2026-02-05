@@ -7,6 +7,7 @@ function errorHandler(err, req, res, next) {
   const status = err.status || 500;
   const payload = {
     message: err.message || 'Internal Server Error',
+    error: err.message || 'Internal Server Error',
   };
   if (process.env.NODE_ENV === 'development' && err.stack) {
     payload.stack = err.stack;

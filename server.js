@@ -19,14 +19,13 @@ app.prepare().then(() => {
   server.use('/api/v1', notFound);
   server.use(errorHandler);
 
-  // 1. Sample REST API endpoint
+  // Sample REST API endpoint
   server.get('/api/hello', (req, res) => {
     res.json({ message: 'Hello from Node.js back-end!' });
   });
 
-  // 2. Corrected Catch-all: Change '/*' to '*' 
-  // This sends all other requests to the Next.js renderer
-  server.all(/.*/, (req, res) => {
+  // Handle all other requests with Next.js
+  server.use((req, res) => {
     return handle(req, res);
   });
 

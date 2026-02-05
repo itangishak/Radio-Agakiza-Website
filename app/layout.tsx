@@ -1,23 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import StickyPlayer from "../components/StickyPlayer";
+import AppShell from "./AppShell";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const playfair = Playfair_Display({
+  variable: "--font-serif",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Radio Agakiza — Live Christian Radio",
-  description: "Listen live to Radio Agakiza. Programs, podcasts, news, and testimonies.",
+  title: "Radio Agakiza — Radiyo y'icizere",
+  description: "Tega amatwi Radio Agakiza. Ibiganiro, podikasti, inkuru n'ivyo bavuze.",
+  icons: {
+    icon: "/icon.ico",
+    shortcut: "/icon.ico",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,14 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-zinc-900 dark:bg-black dark:text-zinc-100`}>
-        <Header />
-        <main className="mx-auto min-h-screen max-w-6xl px-4 py-8 pb-28">
-          {children}
-        </main>
-        <Footer />
-        <StickyPlayer />
+    <html lang="rn">
+      <body className={`${inter.variable} ${playfair.variable} antialiased bg-white text-zinc-900`}>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Line clamp utilities */
+.line-clamp-10 {
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
+:root {
+  --background: #ffffff;
+  --foreground: #0f1b2d;
+}
+
+/* Brand from logo: deep navy + hope green */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand-50: #eef6fb;
+  --color-brand-100: #d7e7f3;
+  --color-brand-200: #b5d2e7;
+  --color-brand-300: #8fb9d9;
+  --color-brand-400: #4c8dbf;
+  --color-brand-500: #2a6fa8; /* mid navy */
+  --color-brand-600: #174f80; /* primary navy */
+  --color-brand-700: #0f3d62; /* dark navy */
+  --color-brand-800: #0c2f4c;
+  --color-brand-900: #0a253d;
+
+  --color-accent-100: #e7f4df;
+  --color-accent-300: #bfe2a6;
+  --color-accent-500: #78b640; /* hope green */
+  --color-accent-600: #5ea12f;
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-serif);
 }
 
+/* Force light appearance regardless of OS dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #0f1b2d;
   }
 }
 
+/* Base typography */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+}
+
+/* Serif headings */
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-serif), Georgia, "Times New Roman", serif; }
+
+/* Hero utilities */
+.bg-hero {
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(120,182,64,0.12), transparent 60%),
+    radial-gradient(800px 400px at -10% 20%, rgba(26,95,128,0.12), transparent 60%),
+    linear-gradient(180deg, rgba(23,79,128,0.06), rgba(23,79,128,0));
+}
+
+/* Hero image + dark overlay */
+.hero-img {
+  background-image: url('/radioagakizalogo.png');
+  background-size: cover;
+  background-position: center;
+}
+.hero-overlay {
+  /* Lighter, whiter overlay for brighter hero while keeping text readable */
+  background: linear-gradient(to bottom right, rgba(15,23,42,0.35), rgba(15,23,42,0.20));
+}
+.text-glow {
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+.btn-primary {
+  @apply inline-flex items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-white shadow-lg shadow-brand-700/20 hover:bg-brand-700 transition;
+}
+.card {
+  @apply rounded-xl border border-black/5 bg-white shadow-sm shadow-black/5 dark:border-white/10 dark:bg-black/40 backdrop-blur;
+}
+
+/* Hover lift for cards */
+.lift {
+  @apply transition-transform transition-shadow duration-200 hover:-translate-y-1 hover:shadow-xl;
+}
+
+/* Elegant gold volume slider */
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #d4af37, #f1d777);
+  outline: none;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; height: 16px; border-radius: 9999px;
+  background: #fff; border: 2px solid #d4af37; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.volume-slider::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 9999px;
+  background: #fff; border: 2px solid #d4af37; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+/* Enhanced animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #174f80, #78b640);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #0f3d62, #5ea12f);
 }

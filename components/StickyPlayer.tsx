@@ -8,6 +8,7 @@ export default function StickyPlayer() {
   const [liveUrl, setLiveUrl] = useState<string>(DEFAULT_STREAM);
   const [isPlaying, setIsPlaying] = useState(false);
   const [status, setStatus] = useState<"idle"|"connecting"|"live"|"buffering"|"error">("idle");
+  const [volume, setVolume] = useState(1);
   const [attempt, setAttempt] = useState(0);
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const waitingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -42,6 +43,7 @@ export default function StickyPlayer() {
       setStatus("connecting");
       el.src = cacheBustedUrl;
       el.load();
+      el.volume = volume;
       await el.play();
       setIsPlaying(true);
       setStatus("live");
@@ -103,6 +105,8 @@ export default function StickyPlayer() {
 
     const onOnline = () => setAttempt((a) => a + 1);
     window.addEventListener("online", onOnline);
+    const onPlayLive = () => { connect(); };
+    window.addEventListener("radioagakiza:play-live", onPlayLive as EventListener);
 
     return () => {
       el.removeEventListener("play", onPlay);
@@ -112,6 +116,7 @@ export default function StickyPlayer() {
       el.removeEventListener("ended", onEnded);
       el.removeEventListener("error", onError);
       window.removeEventListener("online", onOnline);
+      window.removeEventListener("radioagakiza:play-live", onPlayLive as EventListener);
       window.removeEventListener("radioagakiza:pause-live", onPauseLive as EventListener);
       clearTimers();
     };
@@ -149,13 +154,19 @@ export default function StickyPlayer() {
     }
   };
 
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 backdrop-blur dark:bg-black/80">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+    <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-3">
+      <div className="pointer-events-auto mx-auto flex max-w-4xl items-center gap-4 rounded-full border border-black/5 bg-white/95 px-5 py-3 shadow-2xl shadow-black/30 backdrop-blur dark:bg-black/80">
         <button
           onClick={toggle}
           className="h-10 w-10 rounded-full border flex items-center justify-center text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          aria-label={isPlaying ? "Pause live stream" : "Play live stream"}
+          aria-label={isPlaying ? "Hagarika ururirimbo rubyina" : "Tega amatwi"}
         >
           {isPlaying ? "❚❚" : "►"}
         </button>
@@ -165,9 +176,22 @@ export default function StickyPlayer() {
               <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600" />
             </span>
-            <span>LIVE • Radio Agakiza</span>
+            <span>IKIBIRIRAHO • Radio Agakiza</span>
           </div>
-          <span className="text-xs text-zinc-500">{status === "live" ? "Playing" : status === "buffering" ? "Buffering…" : status === "connecting" ? "Connecting…" : status === "error" ? "Reconnecting…" : "Idle"}</span>
+          <span className="text-xs text-zinc-500">{status === "live" ? "Iriko iraca" : status === "buffering" ? "Irasoma…" : status === "connecting" ? "Iriko irahuza…" : status === "error" ? "Irasubira guhuza…" : "Itegereje"}</span>
+        </div>
+        <div className="hidden items-center gap-2 sm:flex">
+          <span className="text-xs text-zinc-500">Ijwi</span>
+          <input
+            className="volume-slider"
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            aria-label="Ijwi"
+          />
         </div>
         <audio ref={audioRef} preload="none" />
       </div>

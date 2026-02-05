@@ -6,6 +6,8 @@ const podcastsRoutes = require('./podcasts');
 const testimonialsRoutes = require('./testimonials');
 const settingsRoutes = require('./settings');
 const analyticsRoutes = require('./analytics');
+const adminRoutes = require('./admin');
+const uploadRoutes = require('./upload');
 
 const router = express.Router();
 
@@ -16,5 +18,7 @@ router.use('/podcasts', podcastsRoutes);
 router.use('/testimonials', testimonialsRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/analytics', analyticsRoutes);
+router.use('/admin', adminRoutes);
+router.use('/', uploadRoutes);
 
 module.exports = router;
