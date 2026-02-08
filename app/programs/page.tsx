@@ -79,11 +79,24 @@ function reminderLink(entry: ScheduleEntry) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${dates}`;
 }
 
-function shareLink(entry: ScheduleEntry) {
-  const message = encodeURIComponent(
-    `Ndagutumiye gukurikira ${entry.program} kuri Radio Agakiza, ${dayLabel(entry.dow)} ${formatClockRange(entry.start, entry.end)} (isaha y'i Bujumbura).`,
-  );
-  return `https://wa.me/?text=${message}`;
+function shareMessage(entry: ScheduleEntry) {
+  return `Ndagutumiye gukurikira ${entry.program} kuri Radio Agakiza, ${dayLabel(entry.dow)} ${formatClockRange(entry.start, entry.end)} (isaha y'i Bujumbura).`;
+}
+
+function shareTargets(entry: ScheduleEntry) {
+  const text = encodeURIComponent(shareMessage(entry));
+  const title = encodeURIComponent(`${entry.program} - Radio Agakiza`);
+  const url = encodeURIComponent(`https://radioagakiza.org/programs?day=${entry.dow}`);
+
+  return {
+    whatsapp: `https://wa.me/?text=${text}%20${url}`,
+    whatsappStatus: `whatsapp://send?text=${text}%20${url}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`,
+    x: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+    gmail: `https://mail.google.com/mail/?view=cm&fs=1&su=${title}&body=${text}%0A%0A${url}`,
+    telegram: `https://t.me/share/url?url=${url}&text=${text}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+  };
 }
 
 export default async function ProgramsPage({
@@ -169,43 +182,54 @@ export default async function ProgramsPage({
                 Nta kiganiro gitegekanijwe kuri uno musi.
               </div>
             ) : (
-              selectedEntries.map((e, idx) => (
-                <div
-                  key={idx}
-                  className="relative overflow-hidden rounded-xl bg-gradient-to-r from-brand-50 to-accent-50/50 p-5 ring-1 ring-brand-200/50 transition-all hover:shadow-lg hover:ring-brand-300"
-                >
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-lg font-bold text-brand-900">{e.program}</h3>
-                      {e.hosts && <p className="text-sm text-brand-600">🎙️ {e.hosts}</p>}
+              selectedEntries.map((e, idx) => {
+                const share = shareTargets(e);
+                return (
+                  <div
+                    key={idx}
+                    className="relative overflow-hidden rounded-xl bg-gradient-to-r from-brand-50 to-accent-50/50 p-5 ring-1 ring-brand-200/50 transition-all hover:shadow-lg hover:ring-brand-300"
+                  >
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-brand-900">{e.program}</h3>
+                        {e.hosts && <p className="text-sm text-brand-600">🎙️ {e.hosts}</p>}
+                      </div>
+                      <div className="rounded-lg bg-white/90 px-3 py-2 text-right shadow-sm">
+                        <p className="text-sm font-semibold text-brand-700">{formatClockRange(e.start, e.end)}</p>
+                        <p className="text-xs text-brand-500">I Bujumbura: {toLocalTimeLabel(e.start, e.tz)}–{toLocalTimeLabel(e.end, e.tz)}</p>
+                      </div>
                     </div>
-                    <div className="rounded-lg bg-white/90 px-3 py-2 text-right shadow-sm">
-                      <p className="text-sm font-semibold text-brand-700">{formatClockRange(e.start, e.end)}</p>
-                      <p className="text-xs text-brand-500">I Bujumbura: {toLocalTimeLabel(e.start, e.tz)}–{toLocalTimeLabel(e.end, e.tz)}</p>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
-                    <a
-                      href={reminderLink(e)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
-                    >
-                      ⏰ Nyibutse
-                    </a>
-                    <a
-                      href={shareLink(e)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-600"
-                    >
-                      🔗 Sangiza
-                    </a>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-600 ring-1 ring-brand-200">✨ Bika iki kiganiro, uheze ugisangize n'abandi</span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <a
+                        href={reminderLink(e)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+                      >
+                        ⏰ Nyibutse
+                      </a>
+
+                      <details className="relative">
+                        <summary className="cursor-pointer list-none rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-600">
+                          🔗 Sangiza
+                        </summary>
+                        <div className="absolute z-10 mt-2 grid min-w-64 gap-2 rounded-xl bg-white p-3 shadow-2xl ring-1 ring-brand-100">
+                          <a href={share.whatsapp} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">WhatsApp</a>
+                          <a href={share.whatsappStatus} className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">WhatsApp Status (mobile)</a>
+                          <a href={share.facebook} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">Facebook</a>
+                          <a href={share.x} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">X (Twitter)</a>
+                          <a href={share.gmail} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">Gmail</a>
+                          <a href={share.telegram} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">Telegram</a>
+                          <a href={share.linkedin} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">LinkedIn</a>
+                        </div>
+                      </details>
+
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-600 ring-1 ring-brand-200">✨ Bika iki kiganiro, uheze ugisangize n'abandi</span>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </section>
