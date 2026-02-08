@@ -57,29 +57,55 @@ async function deleteSeries(id) {
 async function listEpisodes({ series_id, status, limit = 50, offset = 0 } = {}) {
   const params = [];
   const where = [];
-  if (series_id) { where.push('series_id = ?'); params.push(series_id); }
-  if (status) { where.push('status = ?'); params.push(status); }
+  if (series_id) { where.push('pe.series_id = ?'); params.push(series_id); }
+  if (status) { where.push('pe.status = ?'); params.push(status); }
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
-  const [rows] = await pool.execute(
-    `SELECT id, series_id, title, slug, description, audio_url, source, duration_seconds,
-            episode_number, status, published_at, created_by, created_at, updated_at
-     FROM podcast_episodes
-     ${whereSql}
-     ORDER BY COALESCE(episode_number, 999999), created_at DESC
-     LIMIT ? OFFSET ?`,
-    [...params, Number(limit), Number(offset)]
-  );
-  return rows;
+
+  try {
+    const [rows] = await pool.execute(
+      `SELECT pe.*, ps.title AS series_title
+       FROM podcast_episodes pe
+       LEFT JOIN podcast_series ps ON pe.series_id = ps.id
+       ${whereSql}
+       ORDER BY pe.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [...params, Number(limit), Number(offset)]
+    );
+    return rows;
+  } catch {
+    const fallbackWhere = [];
+    const fallbackParams = [];
+    if (series_id) { fallbackWhere.push('series_id = ?'); fallbackParams.push(series_id); }
+    if (status) { fallbackWhere.push('status = ?'); fallbackParams.push(status); }
+    const fallbackWhereSql = fallbackWhere.length ? `WHERE ${fallbackWhere.join(' AND ')}` : '';
+    const [rows] = await pool.execute(
+      `SELECT * FROM podcast_episodes
+       ${fallbackWhereSql}
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`,
+      [...fallbackParams, Number(limit), Number(offset)]
+    );
+    return rows;
+  }
 }
 
 async function getEpisode(id) {
-  const [[row]] = await pool.execute(
-    `SELECT id, series_id, title, slug, description, audio_url, source, duration_seconds,
-            episode_number, status, published_at, created_by, created_at, updated_at
-     FROM podcast_episodes WHERE id = ? LIMIT 1`,
-    [id]
-  );
-  return row || null;
+  try {
+    const [[row]] = await pool.execute(
+      `SELECT pe.*, ps.title AS series_title
+       FROM podcast_episodes pe
+       LEFT JOIN podcast_series ps ON pe.series_id = ps.id
+       WHERE pe.id = ? LIMIT 1`,
+      [id]
+    );
+    return row || null;
+  } catch {
+    const [[row]] = await pool.execute(
+      `SELECT * FROM podcast_episodes WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    return row || null;
+  }
 }
 
 async function createEpisode(data, userId) {

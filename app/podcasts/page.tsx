@@ -1,3 +1,4 @@
+import Link from "next/link";
 import EpisodeAudio from "../../components/EpisodeAudio";
 import { apiGet } from "../../lib/api";
 
@@ -12,15 +13,15 @@ type Episode = {
   slug: string;
   description: string | null;
   audio_url: string;
-  source: 'upload' | 'external';
+  source?: 'upload' | 'external';
   duration_seconds: number | null;
   episode_number: number | null;
-  status: string;
+  status?: string;
   published_at: string | null;
 };
 
 export default async function PodcastsPage() {
-  const episodes = (await apiGet<Episode[]>("/podcasts/episodes?status=published&limit=20")) ?? [];
+  const episodes = (await apiGet<Episode[]>("/podcasts/episodes?limit=100")) ?? [];
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50/30 via-white to-accent-50/20">
@@ -94,18 +95,21 @@ export default async function PodcastsPage() {
                           {e.episode_number || '#'}
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-brand-900 group-hover:text-brand-700 transition-colors line-clamp-2">
+                          <Link
+                            href={`/podcasts/${e.id}`}
+                            className="text-xl font-bold text-brand-900 transition-colors hover:text-brand-700 line-clamp-2"
+                          >
                             {e.title}
-                          </h2>
+                          </Link>
                           <div className="flex items-center gap-4 text-sm text-brand-600">
                             <span className="flex items-center gap-1">
                               <span className="text-accent-500">📅</span>
                               {e.published_at?.slice(0,10) ?? ''}
                             </span>
-                            {e.duration_seconds && (
+                            {Number.isFinite(e.duration_seconds) && Number(e.duration_seconds) > 0 && (
                               <span className="flex items-center gap-1">
                                 <span className="text-accent-500">⏱️</span>
-                                {Math.round(e.duration_seconds/60)} dakika
+                                {Math.round(Number(e.duration_seconds ?? 0) / 60)} dakika
                               </span>
                             )}
                           </div>
@@ -126,6 +130,19 @@ export default async function PodcastsPage() {
                   {/* Audio Player */}
                   <div className="rounded-xl bg-gradient-to-r from-accent-50 to-brand-50 p-4 ring-1 ring-accent-200/50">
                     <EpisodeAudio src={e.audio_url} title={e.title} />
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <Link
+                      href={`/podcasts/${e.id}`}
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition-transform hover:scale-105"
+                    >
+                      Soma ibisobanuro
+                      <span>→</span>
+                    </Link>
+                    <span className="text-xs font-medium text-brand-500">
+                      Imbere y&apos;amakuru yose
+                    </span>
                   </div>
                 </div>
               </article>
