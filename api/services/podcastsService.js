@@ -57,34 +57,32 @@ async function deleteSeries(id) {
 async function listEpisodes({ series_id, status, limit = 20, offset = 0 } = {}) {
   try {
     let query = 'SELECT * FROM podcast_episodes';
-    
+
     const params = [];
     const conditions = [];
-    
+
     if (series_id !== undefined) {
       conditions.push('series_id = ?');
       params.push(series_id);
     }
-    
+
     if (status) {
       conditions.push('status = ?');
       params.push(status);
     }
-    
+
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
-    
-    // Add sorting and pagination
-    query += ' ORDER BY COALESCE(episode_number, 999999) DESC, created_at DESC';
-    query += ' LIMIT ? OFFSET ?';
-    
-    // Add limit and offset to params
-    const limitNum = Number(limit) || 20;
-    const offsetNum = Number(offset) || 0;
-    params.push(limitNum, offsetNum);
-    
-    // Execute the query
+
+    // Add sorting
+    query += ' ORDER BY COALESCE(published_at, created_at) DESC, created_at DESC';
+
+    // Avoid prepared placeholders for LIMIT/OFFSET for compatibility with some MySQL/MariaDB setups
+    const limitNum = Math.max(1, Number(limit) || 20);
+    const offsetNum = Math.max(0, Number(offset) || 0);
+    query += ` LIMIT ${limitNum} OFFSET ${offsetNum}`;
+
     const [rows] = await pool.execute(query, params);
     return rows || [];
   } catch (error) {
