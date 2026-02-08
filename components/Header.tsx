@@ -42,6 +42,10 @@ export default function Header() {
               Turi Bande
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-500 transition-all group-hover:w-full" />
             </Link>
+            <Link href="/contact" className="text-sm font-medium text-brand-700 hover:text-accent-600 transition-colors relative group">
+              Twandikire
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-500 transition-all group-hover:w-full" />
+            </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -75,6 +79,9 @@ export default function Header() {
               </Link>
               <Link href="/about" className="block px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 rounded-lg transition-colors">
                 Turi Bande
+              </Link>
+              <Link href="/contact" className="block px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 rounded-lg transition-colors">
+                Twandikire
               </Link>
             </nav>
           </div>

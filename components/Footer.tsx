@@ -85,6 +85,7 @@ export default function Footer() {
               <a href="/podcasts" className="block text-white/80 transition-colors hover:text-accent-300">Ibiganiro</a>
               <a href="/news" className="block text-white/80 transition-colors hover:text-accent-300">Ivyanditswe</a>
               <a href="/about" className="block text-white/80 transition-colors hover:text-accent-300">Turi Bande</a>
+              <a href="/contact" className="block text-white/80 transition-colors hover:text-accent-300">Twandikire</a>
             </nav>
           </div>
 
