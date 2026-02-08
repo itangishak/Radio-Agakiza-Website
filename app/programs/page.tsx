@@ -1,5 +1,5 @@
 import { apiGet } from "../../lib/api";
-import { formatRangeWithTz, toLocalTimeLabel } from "../../lib/time";
+import { toLocalTimeLabel } from "../../lib/time";
 
 type Host = { id: number; full_name: string };
 
@@ -27,7 +27,15 @@ export const metadata = {
 };
 
 function dayLabel(dow0to6: number) {
-  const labels = ["Ku w'Imana", "Ku wa mbere", "Ku wa kabiri", "Ku wa gatatu", "Ku wa kane", "Ku wa gatanu", "Ku wa gatandatu"];
+  const labels = [
+    "Ku wa mbere (Dimanche)",
+    "Ku wa kabiri (Lundi)",
+    "Ku wa gatatatu (Mardi)",
+    "Ku wa kane (Mercredi)",
+    "Ku wa gatanu (Jeudi)",
+    "Ku wa gatandatu (Vendredi)",
+    "Kw' Isabato (Samedi)",
+  ];
   return labels[dow0to6] ?? "";
 }
 
@@ -39,6 +47,10 @@ function sanitizeDay(day: string | undefined) {
 function normalizeClock(time: string) {
   const [hour = "00", minute = "00"] = time.split(":");
   return { hour: Number(hour), minute: Number(minute) };
+}
+
+function formatClockRange(start: string, end: string) {
+  return `${start.slice(0, 5)}–${end.slice(0, 5)}`;
 }
 
 function toGoogleCalendarDate(dow: number, time: string) {
@@ -61,7 +73,7 @@ function toGoogleCalendarDate(dow: number, time: string) {
 function reminderLink(entry: ScheduleEntry) {
   const title = encodeURIComponent(`${entry.program} - Radio Agakiza`);
   const details = encodeURIComponent(
-    `${entry.program} hamwe na ${entry.hosts || "abakozi ba Radio Agakiza"}. Bikurikire ${dayLabel(entry.dow)} kuva ${formatRangeWithTz(entry.start, entry.end, entry.tz)} (isaha y'i Bujumbura).`,
+    `${entry.program} hamwe na ${entry.hosts || "abakozi ba Radio Agakiza"}. Bikurikire ${dayLabel(entry.dow)} kuva ${formatClockRange(entry.start, entry.end)} (isaha y'i Bujumbura).`,
   );
   const dates = `${toGoogleCalendarDate(entry.dow, entry.start)}/${toGoogleCalendarDate(entry.dow, entry.end)}`;
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${dates}`;
@@ -69,7 +81,7 @@ function reminderLink(entry: ScheduleEntry) {
 
 function shareLink(entry: ScheduleEntry) {
   const message = encodeURIComponent(
-    `Ndagutumiye gukurikira ${entry.program} kuri Radio Agakiza, ${dayLabel(entry.dow)} ${formatRangeWithTz(entry.start, entry.end, entry.tz)} (isaha y'i Bujumbura).`,
+    `Ndagutumiye gukurikira ${entry.program} kuri Radio Agakiza, ${dayLabel(entry.dow)} ${formatClockRange(entry.start, entry.end)} (isaha y'i Bujumbura).`,
   );
   return `https://wa.me/?text=${message}`;
 }
@@ -168,7 +180,7 @@ export default async function ProgramsPage({
                       {e.hosts && <p className="text-sm text-brand-600">🎙️ {e.hosts}</p>}
                     </div>
                     <div className="rounded-lg bg-white/90 px-3 py-2 text-right shadow-sm">
-                      <p className="text-sm font-semibold text-brand-700">{formatRangeWithTz(e.start, e.end, e.tz)}</p>
+                      <p className="text-sm font-semibold text-brand-700">{formatClockRange(e.start, e.end)}</p>
                       <p className="text-xs text-brand-500">I Bujumbura: {toLocalTimeLabel(e.start, e.tz)}–{toLocalTimeLabel(e.end, e.tz)}</p>
                     </div>
                   </div>
@@ -211,7 +223,7 @@ export default async function ProgramsPage({
                     <ul className="space-y-1 text-sm text-brand-600">
                       {list.map((item, idx) => (
                         <li key={idx}>
-                          <span className="font-semibold">{item.program}</span> · {formatRangeWithTz(item.start, item.end, item.tz)}
+                          <span className="font-semibold">{item.program}</span> · {formatClockRange(item.start, item.end)}
                         </li>
                       ))}
                     </ul>
