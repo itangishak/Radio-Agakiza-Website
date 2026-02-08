@@ -128,6 +128,8 @@ export default async function ProgramsPage({
   const grouped: Record<number, typeof entries> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
   for (const e of entries) grouped[e.dow].push(e);
   const selectedEntries = grouped[selectedDay];
+  const previousDay = (selectedDay + 6) % 7;
+  const nextDay = (selectedDay + 1) % 7;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50/30 via-white to-accent-50/20">
@@ -151,18 +153,14 @@ export default async function ProgramsPage({
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-wrap justify-center gap-2 rounded-2xl bg-white/80 p-4 shadow-lg ring-1 ring-brand-100">
-          {Array.from({ length: 7 }, (_, d) => (
-            <a
-              key={d}
-              href={`/programs?day=${d}`}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                selectedDay === d ? "bg-gradient-to-r from-brand-600 to-accent-500 text-white shadow" : "bg-brand-50 text-brand-700 hover:bg-brand-100"
-              }`}
-            >
-              {dayLabel(d)}
-            </a>
-          ))}
+        <div className="mb-8 flex items-center justify-between gap-3 rounded-2xl bg-white/80 p-4 shadow-lg ring-1 ring-brand-100">
+          <a href={`/programs?day=${previousDay}`} className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+            ← Umusi wabanje
+          </a>
+          <p className="text-sm font-semibold text-brand-700">{dayLabel(selectedDay)}</p>
+          <a href={`/programs?day=${nextDay}`} className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100">
+            Umusi ukurikira →
+          </a>
         </div>
 
         <section className="group relative overflow-hidden rounded-3xl bg-white/90 p-8 shadow-2xl shadow-brand-900/10 ring-1 ring-brand-100 backdrop-blur-sm">
@@ -212,9 +210,9 @@ export default async function ProgramsPage({
 
                       <details className="relative">
                         <summary className="cursor-pointer list-none rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-600">
-                          🔗 Sangiza
+                          🔗 Share popover
                         </summary>
-                        <div className="absolute z-10 mt-2 grid min-w-64 gap-2 rounded-xl bg-white p-3 shadow-2xl ring-1 ring-brand-100">
+                        <div className="absolute right-0 z-10 mt-2 grid min-w-64 gap-2 rounded-xl bg-white p-3 shadow-2xl ring-1 ring-brand-100">
                           <a href={share.whatsapp} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">WhatsApp</a>
                           <a href={share.whatsappStatus} className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">WhatsApp Status (mobile)</a>
                           <a href={share.facebook} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700 hover:bg-brand-100">Facebook</a>
