@@ -54,22 +54,45 @@ async function deleteSeries(id) {
 }
 
 // Episodes
-async function listEpisodes({ series_id, status, limit = 50, offset = 0 } = {}) {
-  const params = [];
-  const where = [];
-  if (series_id) { where.push('series_id = ?'); params.push(series_id); }
-  if (status) { where.push('status = ?'); params.push(status); }
-  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
-  const [rows] = await pool.execute(
-    `SELECT id, series_id, title, slug, description, audio_url, source, duration_seconds,
-            episode_number, status, published_at, created_by, created_at, updated_at
-     FROM podcast_episodes
-     ${whereSql}
-     ORDER BY COALESCE(episode_number, 999999), created_at DESC
-     LIMIT ? OFFSET ?`,
-    [...params, Number(limit), Number(offset)]
-  );
-  return rows;
+async function listEpisodes({ series_id, status, limit = 20, offset = 0 } = {}) {
+  try {
+    let query = 'SELECT id, series_id, title, slug, description, audio_url, source, duration_seconds, ' +
+                'episode_number, status, published_at, created_by, created_at, updated_at ' +
+                'FROM podcast_episodes';
+    
+    const params = [];
+    const conditions = [];
+    
+    if (series_id !== undefined) {
+      conditions.push('series_id = ?');
+      params.push(series_id);
+    }
+    
+    if (status) {
+      conditions.push('status = ?');
+      params.push(status);
+    }
+    
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    // Add sorting and pagination
+    query += ' ORDER BY COALESCE(episode_number, 999999) DESC, created_at DESC';
+    query += ' LIMIT ? OFFSET ?';
+    
+    // Add limit and offset to params
+    const limitNum = Number(limit) || 20;
+    const offsetNum = Number(offset) || 0;
+    params.push(limitNum, offsetNum);
+    
+    // Execute the query
+    const [rows] = await pool.execute(query, params);
+    return rows || [];
+  } catch (error) {
+    console.error('Error in listEpisodes:', error);
+    throw error; // Re-throw to be handled by the controller
+  }
 }
 
 async function getEpisode(id) {

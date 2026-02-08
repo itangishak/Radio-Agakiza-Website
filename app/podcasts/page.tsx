@@ -21,7 +21,12 @@ type Episode = {
 };
 
 export default async function PodcastsPage() {
-  const episodes = (await apiGet<Episode[]>("/podcasts/episodes?status=published&limit=20")) ?? [];
+  const response = await apiGet<Episode[]>("/podcasts/episodes?status=published&limit=20");
+  const episodes = Array.isArray(response) ? response : [];
+  
+  if (episodes.length === 0) {
+    console.error('No episodes found or error fetching episodes');
+  }
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50/30 via-white to-accent-50/20">

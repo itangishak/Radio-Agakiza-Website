@@ -18,9 +18,22 @@ async function handle<T>(res: Response): Promise<T | null> {
 export async function apiGet<T>(path: string, init?: RequestInit): Promise<T | null> {
   const url = `${API_BASE}${path}`;
   try {
-    const res = await fetch(url, { cache: 'no-store', ...init });
+    const res = await fetch(url, { 
+      cache: 'no-store', 
+      ...init 
+    });
+    
+    if (!res.ok) {
+      console.error(`API Error (${res.status}): ${res.statusText}`, { url });
+      const errorText = await res.text();
+      console.error('Response body:', errorText);
+      return null;
+    }
+    
     return await handle<T>(res);
-  } catch {
+  } catch (error) {
+    console.error('API Request Failed:', error);
+    console.error('Request URL:', url);
     return null;
   }
 }

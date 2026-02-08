@@ -38,8 +38,21 @@ exports.deleteSeries = asyncHandler(async (req, res) => {
 
 // Episodes
 exports.listEpisodes = asyncHandler(async (req, res) => {
-  const { series_id, status, limit, offset } = req.query;
-  const data = await svc.listEpisodes({ series_id, status, limit, offset });
+  // Parse query parameters with proper type conversion
+  const { series_id, status, limit = '20', offset = '0' } = req.query;
+  
+  // Convert string parameters to appropriate types
+  const query = {
+    series_id: series_id ? parseInt(series_id, 10) : undefined,
+    status: status || 'published', // Default to 'published' if not specified
+    limit: parseInt(limit, 10) || 20,
+    offset: parseInt(offset, 10) || 0
+  };
+  
+  // Remove undefined values
+  Object.keys(query).forEach(key => query[key] === undefined && delete query[key]);
+  
+  const data = await svc.listEpisodes(query);
   res.json(data);
 });
 
