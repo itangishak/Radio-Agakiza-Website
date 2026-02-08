@@ -56,9 +56,7 @@ async function deleteSeries(id) {
 // Episodes
 async function listEpisodes({ series_id, status, limit = 20, offset = 0 } = {}) {
   try {
-    let query = 'SELECT id, series_id, title, slug, description, audio_url, source, duration_seconds, ' +
-                'episode_number, status, published_at, created_by, created_at, updated_at ' +
-                'FROM podcast_episodes';
+    let query = 'SELECT * FROM podcast_episodes';
     
     const params = [];
     const conditions = [];
@@ -97,9 +95,7 @@ async function listEpisodes({ series_id, status, limit = 20, offset = 0 } = {}) 
 
 async function getEpisode(id) {
   const [[row]] = await pool.execute(
-    `SELECT id, series_id, title, slug, description, audio_url, source, duration_seconds,
-            episode_number, status, published_at, created_by, created_at, updated_at
-     FROM podcast_episodes WHERE id = ? LIMIT 1`,
+    `SELECT * FROM podcast_episodes WHERE id = ? LIMIT 1`,
     [id]
   );
   return row || null;
