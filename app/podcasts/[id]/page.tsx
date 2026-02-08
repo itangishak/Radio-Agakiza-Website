@@ -24,7 +24,8 @@ type PageProps = {
 export default async function PodcastDetailPage({ params }: PageProps) {
   const episode = await apiGet<Episode>(`/podcasts/episodes/${params.id}`);
 
-  if (!episode) {
+  const isExplicitlyUnpublished = episode?.status && episode.status !== "published";
+  if (!episode || isExplicitlyUnpublished) {
     notFound();
   }
 
